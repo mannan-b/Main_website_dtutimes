@@ -3,23 +3,102 @@ import { Row, Col } from "reactstrap";
 
 const EditionCards = () => {
   const [mob, setMob] = React.useState(true);
+  const [editions, setEditions] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
 
+  // Handle window resize
   React.useEffect(() => {
-    const a = window.innerWidth;
-    if (a <= 900) {
-      setMob(true);
-    } else {
-      setMob(false);
-    }
-    window.addEventListener("resize", () => {
-      const b = window.innerWidth;
-      if (b <= 900) {
-        setMob(true);
-      } else {
-        setMob(false);
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setMob(width <= 900);
+    };
+
+    // Set initial state
+    handleResize();
+    
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+    
+    // Cleanup
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Fetch editions from API
+  React.useEffect(() => {
+    const fetchEditions = async () => {
+      try {
+        setLoading(true);
+        // Replace 'your-api-base-url' with your actual API base URL
+        const response = await fetch('https://your-api-base-url/api/edition');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        // Take only the first 8 editions (newest)
+        const latestEditions = data.slice(0, 8);
+        setEditions(latestEditions);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching editions:', err);
+        setError('Failed to load editions');
+      } finally {
+        setLoading(false);
       }
-    });
-  },[mob]);
+    };
+
+    fetchEditions();
+  }, []);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="section section-cards" style={{ paddingTop: "0rem", minHeight: "400px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div>Loading editions...</div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="section section-cards" style={{ paddingTop: "0rem", minHeight: "400px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div>Error: {error}</div>
+      </div>
+    );
+  }
+
+  // Grid item class names for positioning
+  const gridClasses = [
+    "first-card", "second-card", "third-card", "fourth-card",
+    "fifth-card", "sixth-card", "seventh-card", "eight-card", "ninth-card"
+  ];
+
+  const renderEditionGrid = () => {
+    return editions.map((edition, index) => (
+      <li key={edition.id} className={`grid__item ${gridClasses[index] || 'grid__item'}`}>
+        <a
+          className="grid__link"
+          href={edition.link || `/editions/${edition.id}`}
+          target={edition.link ? "_blank" : "_self"}
+          rel={edition.link ? "noopener noreferrer" : ""}
+        >
+          <img
+            alt={edition.name || `Edition ${edition.id}`}
+            className="grid__img layer"
+            src={edition.imgUrl || '/placeholder-edition.jpg'}
+            onError={(e) => {
+              e.target.src = '/placeholder-edition.jpg'; // Fallback
+            }}
+          />
+        </a>
+      </li>
+    ));
+  };
+
   if (mob === false) {
     return (
       <>
@@ -54,7 +133,6 @@ const EditionCards = () => {
                       <strong>Editions</strong>
                     </span>
                   </h2>
-                  {/* #F7717 */}
                   <h6 className="category">By DTU Times </h6>
                   <h5
                     style={{
@@ -79,132 +157,7 @@ const EditionCards = () => {
           <section className="section-intro">
             <div className="isolayer isolayer--deco1 isolayer--shadow js">
               <ul className="grid grid--loaded">
-                <li className="grid__item first-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //1 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/981/conversions/edition57-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item second-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //2 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/986/conversions/edition49-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item third-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //7 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/983/conversions/edition48-cover.jpg"
-                    />
-                  </a>
-                </li>
-
-                {/* <li className="grid__item fourth-card">
-                <a
-                  className="grid__link"
-                  href="#pablo"
-                  onClick={e => e.preventDefault()}
-                >
-                  <img
-                    alt="..."
-                    className="grid__img layer"
-                    src="http://dtutimes.dtu.ac.in/img/47.png"
-                  />
-                </a>
-              </li> */}
-                <li className="grid__item fifth-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //5 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com//storage/984/conversions/47-edition-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item sixth-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //6 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/985/conversions/edition-46-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item seventh-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //3 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/987/conversions/edition-45-final-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item eight-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //4 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/988/conversions/dtu-times-edition-44-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item ninth-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //8 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/989/conversions/edition-43-cover.jpg"
-                    />
-                  </a>
-                </li>
+                {renderEditionGrid()}
               </ul>
             </div>
           </section>
@@ -246,7 +199,6 @@ const EditionCards = () => {
                       <strong>Editions</strong>
                     </span>
                   </h2>
-                  {/* #F7717 */}
                   <h6 className="category">By DTU Times </h6>
                   <h5
                     style={{
@@ -267,132 +219,7 @@ const EditionCards = () => {
           <section className="section-intro">
             <div className="isolayer isolayer--deco1 isolayer--shadow js">
               <ul className="grid grid--loaded">
-                <li className="grid__item first-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/*1*/}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/981/conversions/edition57-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item second-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //2 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/986/conversions/edition49-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item third-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //7 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/983/conversions/edition48-cover.jpg"
-                    />
-                  </a>
-                </li>
-
-                {/* <li className="grid__item fourth-card">
-                <a
-                  className="grid__link"
-                  href="#pablo"
-                  onClick={e => e.preventDefault()}
-                >
-                  <img
-                    alt="..."
-                    className="grid__img layer"
-                    src="https://nix.dtutimes.com/storage/984/conversions/47-edition-cover.jpg"
-                  />
-                </a>
-              </li> */}
-                <li className="grid__item fifth-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //5 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/985/conversions/edition-46-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item sixth-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //6 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/987/conversions/edition-45-final-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item seventh-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //3 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/988/conversions/dtu-times-edition-44-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item eight-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //4 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/989/conversions/edition-43-cover.jpg"
-                    />
-                  </a>
-                </li>
-                <li className="grid__item ninth-card">
-                  <a
-                    className="grid__link"
-                    href="/editions"
-                    //   onClick={e => e.preventDefault()}
-                  >
-                    {/* //8 */}
-                    <img
-                      alt="..."
-                      className="grid__img layer"
-                      src="https://nix.dtutimes.com/storage/990/conversions/edition-42-cover.jpg"
-                    />
-                  </a>
-                </li>
+                {renderEditionGrid()}
               </ul>
             </div>
           </section>
@@ -401,4 +228,5 @@ const EditionCards = () => {
     );
   }
 };
+
 export default EditionCards;
